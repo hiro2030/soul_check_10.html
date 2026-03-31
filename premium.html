@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>魂度数測定 - 完全版</title>
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { font-family: sans-serif; background-color: #ffffff; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .card { background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; text-align: center; width: 95%; max-width: 480px; }
-        h1 { font-size: 1.5rem; color: #1e293b; margin-bottom: 25px; line-height: 1.4; }
-        #progress { color: #94a3b8; font-size: 0.85rem; margin-bottom: 12px; font-weight: bold; letter-spacing: 1px; }
-        button { background-color: #e0f2fe; color: #0369a1; border: none; padding: 16px; margin: 10px 0; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 500; width: 100%; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(3, 105, 161, 0.05); outline: none; }
-        button:hover { background-color: #bae6fd; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(3, 105, 161, 0.1); }
+        h1 { font-size: 1.4rem; color: #1e293b; margin-bottom: 25px; }
+        #progress { color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px; font-weight: bold; }
+        button { background-color: #e0f2fe; color: #0369a1; border: none; padding: 14px; margin: 8px 0; border-radius: 10px; cursor: pointer; font-size: 0.95rem; width: 100%; transition: 0.2s; }
+        button:hover { background-color: #bae6fd; transform: translateY(-1px); }
         .hidden { display: none; }
+        .res-val { font-size: 2.5rem; font-weight: bold; color: #0369a1; margin: 10px 0; }
     </style>
 </head>
 <body>
@@ -21,38 +22,38 @@
         <div id="options"></div>
     </div>
     <div class="card hidden" id="result">
-        <h1>魂の鑑定結果</h1>
-        <p id="type-text" style="font-size: 1.6rem; font-weight: bold; color: #0369a1; margin: 20px 0;"></p>
-        <p id="desc-text" style="line-height: 1.6; font-size: 1.1rem; color: #334155;"></p>
-        <button onclick="location.reload()" style="background:#f1f5f9; color:#64748b; margin-top:30px;">もう一度測定する</button>
+        <h1>鑑定結果：あなたの愛の度数</h1>
+        <div class="res-val"><span id="score"></span>度</div>
+        <p id="type-text" style="font-size: 1.2rem; font-weight: bold; color: #0369a1; margin-bottom: 15px;"></p>
+        <p id="desc-text" style="line-height: 1.6; font-size: 1rem; text-align: left;"></p>
+        <button onclick="location.reload()" style="background:#f1f5f9; color:#64748b; margin-top:30px;">もう一度自分を見つめる</button>
     </div>
 
     <script>
         const questions = [
-            { q: "朝、目覚めた瞬間の気分は？", a: ["最高に熱い", "穏やかな凪", "まだ眠い", "少し重い", "ワクワクが止まらない"], s: [10, 8, 4, 2, 9] },
-            { q: "直感を信じて行動することが多い？", a: ["常に直感", "たまに信じる", "論理的に考える", "あまりない", "周りに合わせる"], s: [10, 8, 5, 2, 4] },
-            { q: "情熱の温度を数字にするなら？", a: ["1950度", "100度", "36.5度", "氷点下", "測定不能"], s: [10, 6, 4, 1, 9] },
-            { q: "今の自分は「本当の自分」だと思う？", a: ["100%自分", "だいたい自分", "模索中", "仮面を被っている", "変わりたい"], s: [10, 8, 5, 2, 6] },
-            { q: "他人の感情に敏感な方だ？", a: ["かなり敏感", "普通", "鈍感な方", "全く気にしない", "時と場合による"], s: [10, 7, 4, 1, 5] },
-            { q: "初対面で相手の「温度」を感じる？", a: ["よく感じる", "たまに感じる", "あまり分からない", "全く分からない", "興味がない"], s: [10, 7, 4, 1, 2] },
-            { q: "一人の時間はあなたにとって？", a: ["魂の充電", "自分を見つめる時", "少し退屈", "寂しい", "自由そのもの"], s: [10, 9, 5, 2, 10] },
-            { q: "大きな壁が現れた時、どう思う？", a: ["面白くなってきた", "よし、やるぞ", "どうにかしなきゃ", "逃げたい", "誰かを頼る"], s: [10, 8, 5, 1, 4] },
-            { q: "過去の失敗をどう捉えている？", a: ["必要な経験", "学びの種", "たまに後悔する", "思い出したくない", "忘れてしまった"], s: [10, 8, 4, 1, 3] },
-            { q: "空や風からメッセージを感じる？", a: ["よくある", "たまにある", "あまりない", "気のせいだと思う", "空想が好き"], s: [10, 7, 3, 1, 6] },
-            { q: "見返りがなくても人を助けられる？", a: ["自然にできる", "できるだけする", "余裕があれば", "難しい", "自分を優先する"], s: [10, 8, 5, 2, 3] },
-            { q: "人生の終わりに何を重視する？", a: ["やりきった充実感", "残した功績", "平穏だったこと", "大切な人の笑顔", "まだ分からない"], s: [10, 8, 5, 9, 4] },
-            { q: "創作中、時間が止まる感覚がある？", a: ["常にある", "たまにある", "あまりない", "集中できない", "無心になれる"], s: [10, 8, 4, 1, 9] },
-            { q: "他人の悲しみを自分の事のように感じる？", a: ["強く感じる", "共感する", "客観的に見る", "関心がない", "受け流す"], s: [10, 8, 5, 1, 4] },
-            { q: "今の魂の状態を一言で言うなら？", a: ["1950度の情熱", "凪の状態", "燃焼中", "くすぶっている", "覚醒前夜"], s: [10, 9, 7, 3, 8] },
-            { q: "自分の中に「譲れない芯」がある？", a: ["確固たるものがある", "あると思う", "まだ探している", "流されやすい", "柔軟でいたい"], s: [10, 8, 5, 2, 6] },
-            { q: "日常の些細なことに感動できる？", a: ["常に感動がある", "よくある", "たまにある", "ほとんどない", "意識していない"], s: [10, 8, 5, 2, 3] },
-            { q: "今の生活にワクワクしている？", a: ["最高にワクワク", "それなりに楽しい", "普通", "あまり楽しくない", "変化を求めている"], s: [10, 8, 5, 2, 6] },
-            { q: "「運」は自分で手繰り寄せるもの？", a: ["100%そう思う", "ある程度思う", "運次第だと思う", "考えたことがない", "運も実力のうち"], s: [10, 8, 4, 2, 7] },
-            { q: "あなたは「魂」の存在を信じている？", a: ["確信している", "信じている", "分からない", "信じない", "考え中"], s: [10, 8, 4, 1, 5] }
+            { q: "嫌いな人が困っていたらどうする？", a: ["心から助ける", "義務感で助ける", "無視する", "少しざまあみろと思う", "関わらないように祈る"], s: [50, 35, 10, 0, 20] },
+            { q: "自分のミスを他人のせいにしたくなる？", a: ["絶対にしない", "たまに思うが認める", "心の中で言い訳する", "正直に言えない事がある", "環境のせいにする"], s: [50, 40, 20, 10, 5] },
+            { q: "「愛」とは何だと思う？", a: ["自己犠牲", "見返りのない奉仕", "お互いの利益", "依存すること", "ただそこにある光"], s: [30, 50, 15, 5, 45] },
+            { q: "誰も見ていない時、ゴミを捨てる？", a: ["絶対に捨てない", "拾うことまである", "たまに捨ててしまう", "隠して捨てる", "考えたことがない"], s: [45, 50, 5, 0, 10] },
+            { q: "他人の成功を心から喜べる？", a: ["常に自分のことのように喜ぶ", "少し嫉妬する", "表面上だけ祝う", "比較して落ち込む", "興味がない"], s: [50, 25, 15, 10, 5] },
+            { q: "植物や動物に話しかける？", a: ["日常的にある", "たまにする", "心の中で思う", "バカげていると思う", "意識したことがない"], s: [50, 40, 30, 0, 15] },
+            { q: "お金と愛、どちらが大切？", a: ["圧倒的に愛", "現実的にはお金", "両方同じくらい", "お金があれば愛は買える", "分からない"], s: [50, 20, 40, 0, 10] },
+            { q: "今の自分の度数は高いと思う？", a: ["まだまだ未熟だと思う", "平均より高いはず", "謙虚にありたい", "高いと信じている", "どうでもいい"], s: [50, 20, 45, 25, 5] },
+            { q: "1日のうち、感謝する回数は？", a: ["数え切れない", "食事の時くらい", "意識して数回", "忘れていることが多い", "特にない"], s: [50, 20, 35, 10, 0] },
+            { q: "明日世界が終わるなら？", a: ["誰かのために祈る", "家族と静かに過ごす", "好きなものを食べる", "絶望して過ごす", "いつも通り過ごす"], s: [50, 45, 20, 5, 40] },
+            { q: "他人の助言を素直に聞ける？", a: ["常に感謝して聞く", "内容による", "反論したくなる", "聞き流す", "自分が正しいと思う"], s: [50, 30, 10, 15, 0] },
+            { q: "怒りを感じた時、どうする？", a: ["愛で包み込む", "深呼吸して抑える", "相手にぶつける", "根に持つ", "紙に書いて捨てる"], s: [50, 40, 5, 0, 35] },
+            { q: "「幸せ」を感じる瞬間は？", a: ["誰かを笑顔にした時", "美味しいものを食べた時", "目標を達成した時", "何もない平穏な時", "他人より優位な時"], s: [50, 30, 25, 45, 0] },
+            { q: "あなたは「自分」を愛している？", a: ["心から愛している", "少しずつ好きになっている", "嫌いな部分が多い", "考えたことがない", "他人を愛する方が先"], s: [50, 40, 10, 20, 25] },
+            { q: "不公平な出来事に直面したら？", a: ["赦（ゆる）す", "正義のために戦う", "不満を言い続ける", "諦める", "自分も同じことをする"], s: [50, 35, 5, 15, 0] },
+            { q: "空を見上げて宇宙を感じる？", a: ["頻繁にある", "たまに感じる", "忙しくて見ない", "ただの空だと思う", "夜だけ見る"], s: [50, 35, 10, 5, 20] },
+            { q: "「死」を恐れている？", a: ["魂の旅立ちだと思う", "少し怖い", "とても怖い", "考えないようにしている", "無になるだけだと思う"], s: [50, 30, 15, 20, 10] },
+            { q: "子供や弱い存在にどう接する？", a: ["慈しみの心で接する", "普通に接する", "少し面倒に感じる", "威圧的になる", "守るべきだと思う"], s: [50, 30, 15, 0, 45] },
+            { q: "祈りは通じると思う？", a: ["確信している", "そう願っている", "偶然だと思う", "通じないと思う", "気休めだと思う"], s: [50, 40, 20, 0, 5] },
+            { q: "1950度の光になりたい？", a: ["本気で目指したい", "自分なりに近づきたい", "理想だと思う", "自分には無理だ", "興味がある"], s: [50, 45, 35, 10, 25] }
         ];
 
         let currentIdx = 0, totalScore = 0;
-
         function shuffle(array) {
             for (let i = array.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -65,11 +66,14 @@
             if(currentIdx >= questions.length) {
                 document.getElementById('quiz').classList.add('hidden');
                 document.getElementById('result').classList.remove('hidden');
+                document.getElementById('score').innerText = totalScore;
                 let type = "", desc = "";
-                if(totalScore >= 180) { type = "1950度の超新星"; desc = "あなたの情熱は周囲を照らし、未来を切り拓く圧倒的な力を持っています。"; }
-                else if(totalScore >= 140) { type = "静寂の蒼い炎"; desc = "冷静沈着に見えて、内側には誰よりも熱く、純粋なエネルギーを秘めています。"; }
-                else if(totalScore >= 100) { type = "変幻自在の凪"; desc = "どんな状況でも自分を保ち、周囲と調和しながら進める達人です。"; }
-                else { type = "覚醒前夜のマグマ"; desc = "まだ見ぬ可能性が眠っています。これから温度が上がっていくのが楽しみな状態です。"; }
+                if(totalScore >= 951) { type = "覚醒：1950度の超新星"; desc = "あなたは人類の限界を超え、光の存在へと近づいています。その愛で世界を照らしてください。"; }
+                else if(totalScore >= 950) { type = "究極：ペドゥリート級"; desc = "おめでとうございます！アミに選ばれたペドゥリート（950度）と同等の魂の持ち主です。その純粋さは宝物です。"; }
+                else if(totalScore >= 760) { type = "高徳：アミ（宇宙人）級"; desc = "アミ（760度）と同等以上の素晴らしい度数です。地球の常識を超えた、高い視点と愛を持っています。"; }
+                else if(totalScore >= 400) { type = "光明：目覚めし地球人"; desc = "魂が輝き始めています。エゴから解放され、宇宙の法則に従って生きる喜びを知り始めています。"; }
+                else if(totalScore >= 320) { type = "希望：愛の境界線"; desc = "自滅の危機を乗り越えるための最低限の愛を持っています。ここからペドゥリートを目指して磨きましょう！"; }
+                else { type = "未熟：愛の探求者"; desc = "まだ伸びしろしかありません。エゴの重みを少しずつ手放して、愛という軽やかな翼を手に入れましょう。"; }
                 document.getElementById('type-text').innerText = type;
                 document.getElementById('desc-text').innerText = desc;
                 return;
@@ -78,22 +82,11 @@
             document.getElementById('question').innerText = questions[currentIdx].q;
             const opt = document.getElementById('options');
             opt.innerHTML = '';
-            
-            // 選択肢とスコアをセットにしてシャッフル
-            const list = [];
-            for (let i = 0; i < questions[currentIdx].a.length; i++) {
-                list.push({ text: questions[currentIdx].a[i], score: questions[currentIdx].s[i] });
-            }
-            const shuffledList = shuffle([...list]);
-
-            shuffledList.forEach(item => {
+            const list = questions[currentIdx].a.map((text, i) => ({ text, score: questions[currentIdx].s[i] }));
+            shuffle(list).forEach(item => {
                 const btn = document.createElement('button');
                 btn.innerText = item.text;
-                btn.onclick = () => {
-                    totalScore += item.score;
-                    currentIdx++;
-                    showQ();
-                };
+                btn.onclick = () => { totalScore += item.score; currentIdx++; showQ(); };
                 opt.appendChild(btn);
             });
         }
