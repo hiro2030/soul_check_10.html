@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>あなたの魂度数測定</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif; background-color: #f0f7f9; color: #2d3748; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        #app { background: #ffffff; padding: 2.5rem; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.08); max-width: 550px; width: 100%; text-align: center; }
+        h1 { color: #2b6cb0; font-size: 1.6rem; margin-bottom: 0.5rem; }
+        .sub-text { font-size: 0.85rem; color: #a0aec0; margin-bottom: 1.5rem; }
+        .progress { font-size: 0.9rem; color: #718096; margin-bottom: 1rem; }
+        .question-container { min-height: 100px; display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; }
+        .question { font-size: 1.1rem; line-height: 1.7; font-weight: bold; color: #1a365d; text-align: left; }
+        .options { display: flex; flex-direction: column; gap: 10px; }
+        button { background: #fff; border: 1px solid #e2e8f0; padding: 14px 18px; border-radius: 12px; cursor: pointer; transition: 0.2s; font-size: 0.95rem; text-align: left; color: #4a5568; line-height: 1.4; }
+        button:hover { background: #edf2f7; border-color: #cbd5e0; transform: scale(1.01); }
+        #result { display: none; }
+        .score-wrap { margin: 1.5rem 0; }
+        .score { font-size: 5rem; color: #ed8936; font-weight: bold; }
+        .unit { font-size: 1.5rem; color: #ed8936; margin-left: 5px; }
+        .msg-box { background: #fffaf0; padding: 25px; border-radius: 20px; border-left: 8px solid #f6ad55; text-align: left; font-size: 1rem; line-height: 1.8; color: #2d3748; }
+        .retry { background: #4a5568; color: white; border: none; margin-top: 2rem; width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="quiz">
+        <h1>あなたの魂度数測定</h1>
+        <p class="sub-text">〜心の奥底にある「愛の度数」を精密に測ります〜</p>
+        <p id="progress-text" class="progress"></p>
+        <div class="question-container">
+            <p id="q-text" class="question"></p>
+        </div>
+        <div id="options" class="options"></div>
+    </div>
+
+    <div id="result">
+        <h1>測定完了</h1>
+        <p>あなたの現在の魂度数は...</p>
+        <div class="score-wrap"><span id="score-val" class="score">0</span><span class="unit">度</span></div>
+        <div id="res-message" class="msg-box"></div>
+        <button class="retry" onclick="location.reload()">再び、魂を調律する</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "大切な物が壊れたり、予想外のトラブルに見舞われた時、あなたの心境は？", a: [{t: "「起きてしまったことは変えられない」と静かに受け入れる", s: 200}, {t: "「これも何かのタイミングだ」と意味を探して納得する", s: 150}, {t: "一時的に落ち込むが、すぐに次の対処を考え始める", s: 100}, {t: "「どうして今なんだろう」と、不運を悔やむ", s: 50}, {t: "不運を呪い、しばらく負のループから抜け出せない", s: 0}] },
+        { q: "自分と正反対の価値観を持つ人が、強い口調で話しています。その時どう感じますか？", a: [{t: "「そういう考え方もあるのだな」と一つの風景として眺める", s: 200}, {t: "「自分とは違うステージにいる人だ」と割り切る", s: 150}, {t: "不快感はあるが、あえて何も言わずにその場をやり過ごす", s: 100}, {t: "相手の言葉のトゲが気になり、反論したい気持ちが湧く", s: 50}, {t: "相手の未熟さに苛立ち、否定的な感情でいっぱいになる", s: 0}] },
+        { q: "長年執着していた物や、積み上げてきた成果を手放す場面。今のあなたの姿勢は？", a: [{t: "「手放すことに解放感を感じる」と執着を軽やかに捨てる", s: 200}, {t: "「次はもっと良い形になる」と未来を信頼して手放す", s: 150}, {t: "寂しさはあるが、変化は自然なことだと理解している", s: 100}, {t: "失う不安が強く、できれば避けたいと葛藤する", s: 50}, {t: "無理にでも維持しようと、強い執着で抗ってしまう", s: 0}] },
+        { q: "「死」という不可避な変化に対して、今のあなたの死生観は？", a: [{t: "「形が変わるだけの自然なプロセス」として静かに受容している", s: 200}, {t: "「魂の新しい旅立ち」だと信じて、前向きに理解しようとする", s: 150}, {t: "死は必然だと認めているが、時折寂しさが顔を出す", s: 100}, {t: "考えないようにしているが、心の奥底に不安がある", s: 50}, {t: "恐怖や拒絶感が強く、受け入れることは不可能だと感じる", s: 0}] },
+        { q: "気が進まない仕事や、日常の義務に向き合う時の気分は？", a: [{t: "「これも一つの経験」と、今この瞬間を淡々と楽しむ", s: 200}, {t: "「やるべきこと」と割り切って、落ち着きを保つ", s: 150}, {t: "一つずつ終わらせることに集中し、波風を立てない", s: 100}, {t: "「早く終わればいい」と、焦燥感の中でこなす", s: 50}, {t: "「やりたくない」という抵抗感で心が重くなる", s: 0}] },
+        { q: "過去の失敗を思い出した時、あなたは自分に対してどう声をかけますか？", a: [{t: "「あの経験があったから今がある」と丸ごと受け入れている", s: 200}, {t: "「そんな時もあるよね」と、自分を優しく許そうとする", s: 150}, {t: "少し後悔はするが、もう終わったことだと切り替える", s: 100}, {t: "「なぜあんなことをしたのか」と自分を責めてしまう", s: 50}, {t: "失敗の記憶を消したいほど、強い拒絶感を持っている", s: 0}] },
+        { q: "他人から批判されたり、理解されなかったりした時、どう反応しますか？", a: [{t: "「人は自分の眼鏡で世界を見ているだけだ」と平穏を保つ", s: 200}, {t: "「そういう意見もあるな」と一つのデータとして受け取る", s: 150}, {t: "傷つくが、人は人、自分は自分だと言い聞かせる", s: 100}, {t: "相手を説得して、自分の正しさを理解させたくなる", s: 50}, {t: "深い怒りを感じ、相手を攻撃したくなる", s: 0}] },
+        { q: "身近な自然（植物や虫、動物など）に対して、どんな感覚を覚えますか？", a: [{t: "自分と同じ命の輝きを感じ、深い一体感と愛を覚える", s: 200}, {t: "生命の神秘を感じて、穏やかな気持ちになる", s: 150}, {t: "綺麗だな、可愛いなと普通に愛でる", s: 100}, {t: "特に何も気にとめず、景色の一部として通り過ぎる", s: 50}, {t: "自分とは無関係な、単なる物質的な存在だと感じる", s: 0}] },
+        { q: "将来に対する「不安」がふと頭をよぎった時、どう対処しますか？", a: [{t: "「宇宙が導く通りになる」と深い信頼感で今に戻る", s: 200}, {t: "「なんとかなるさ」と楽観的な気持ちでいようとする", s: 150}, {t: "対策を練ることで、不安を解消しようと努力する", s: 100}, {t: "不安が膨らみ、解決策が見えず右往左往してしまう", s: 50}, {t: "最悪の事態ばかり考えて、心身が固まってしまう", s: 0}] },
+        { q: "人助けをする機会があった時、あなたの心境に最も近いのは？", a: [{t: "「自分の一部を助けるようなもの」と、喜びそのものとして動く", s: 200}, {t: "「良いことをすると自分も気持ちいい」と感じて動く", s: 150}, {t: "社会的な義務や道徳として、必要なら手を貸す", s: 100}, {t: "見返りがないと、少し損をしたような気分になる", s: 50}, {t: "「自分のことで精一杯だ」と見て見ぬふりをしてしまう", s: 0}] }
+    ];
+
+    let currentQ = 0;
+    let totalScore = 0;
+
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function showQuestion() {
+        const q = questions[currentQ];
+        document.getElementById('progress-text').innerText = `質問 ${currentQ + 1} / ${questions.length}`;
+        document.getElementById('q-text').innerText = q.q;
+        const optDiv = document.getElementById('options');
+        optDiv.innerHTML = '';
+        
+        const shuffledOptions = shuffle([...q.a]);
+        
+        shuffledOptions.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.innerText = opt.t;
+            btn.onclick = () => {
+                totalScore += opt.s;
+                currentQ++;
+                if(currentQ < questions.length) { showQuestion(); } else { showResult(); }
+            };
+            optDiv.appendChild(btn);
+        });
+    }
+
+    function showResult() {
+        document.getElementById('quiz').style.display = 'none';
+        document.getElementById('result').style.display = 'block';
+        document.getElementById('score-val').innerText = totalScore;
+        let msg = "";
+        if(totalScore >= 1800) msg = "【覚醒の魂】あなたはどんな荒波の中でも「そうよね〜」という受容の境地にいます。愛そのものとして存在し、その平穏は周囲を照らす光となっています。";
+        else if(totalScore >= 1400) msg = "【調和の魂】非常に高い魂度数です。自分の感情を客観的に見つめ、常に「愛の視点」へと戻る力を持っています。安定した凪の状態です。";
+        else if(totalScore >= 800) msg = "【探求の魂】魂の進化の真っ只中にいます。執着に気づき、それを「そうよね〜」と手放そうとする誠実さがあります。一歩ずつ、心は軽くなっています。";
+        else msg = "【休息が必要な魂】今は少し、世界を重く感じているかもしれません。まずは今の自分に「そうよね〜、よく頑張ってるよね」と、最大限の愛を注いであげてください。";
+        document.getElementById('res-message').innerText = msg;
+    }
+    showQuestion();
+</script>
+</body>
+</html>
