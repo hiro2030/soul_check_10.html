@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>魂度数測定 - 完全版</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; text-align: center; width: 95%; max-width: 480px; }
+        h1 { font-size: 1.5rem; color: #1e293b; margin-bottom: 25px; line-height: 1.4; }
+        #progress { color: #94a3b8; font-size: 0.85rem; margin-bottom: 12px; font-weight: bold; letter-spacing: 1px; }
+        button { background-color: #e0f2fe; color: #0369a1; border: none; padding: 16px; margin: 10px 0; border-radius: 12px; cursor: pointer; font-size: 1rem; font-weight: 500; width: 100%; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(3, 105, 161, 0.05); outline: none; }
+        button:hover { background-color: #bae6fd; transform: translateY(-1px); box-shadow: 0 4px 8px rgba(3, 105, 161, 0.1); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="card" id="quiz">
+        <div id="progress"></div>
+        <h1 id="question">読み込み中...</h1>
+        <div id="options"></div>
+    </div>
+    <div class="card hidden" id="result">
+        <h1>魂の鑑定結果</h1>
+        <p id="type-text" style="font-size: 1.6rem; font-weight: bold; color: #0369a1; margin: 20px 0;"></p>
+        <p id="desc-text" style="line-height: 1.6; font-size: 1.1rem; color: #334155;"></p>
+        <button onclick="location.reload()" style="background:#f1f5f9; color:#64748b; margin-top:30px;">もう一度測定する</button>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "朝、目覚めた瞬間の気分は？", a: ["最高に熱い", "穏やかな凪", "まだ眠い", "少し重い", "ワクワクが止まらない"], s: [10, 8, 4, 2, 9] },
+            { q: "直感を信じて行動することが多い？", a: ["常に直感", "たまに信じる", "論理的に考える", "あまりない", "周りに合わせる"], s: [10, 8, 5, 2, 4] },
+            { q: "情熱の温度を数字にするなら？", a: ["1950度", "100度", "36.5度", "氷点下", "測定不能"], s: [10, 6, 4, 1, 9] },
+            { q: "今の自分は「本当の自分」だと思う？", a: ["100%自分", "だいたい自分", "模索中", "仮面を被っている", "変わりたい"], s: [10, 8, 5, 2, 6] },
+            { q: "他人の感情に敏感な方だ？", a: ["かなり敏感", "普通", "鈍感な方", "全く気にしない", "時と場合による"], s: [10, 7, 4, 1, 5] },
+            { q: "初対面で相手の「温度」を感じる？", a: ["よく感じる", "たまに感じる", "あまり分からない", "全く分からない", "興味がない"], s: [10, 7, 4, 1, 2] },
+            { q: "一人の時間はあなたにとって？", a: ["魂の充電", "自分を見つめる時", "少し退屈", "寂しい", "自由そのもの"], s: [10, 9, 5, 2, 10] },
+            { q: "大きな壁が現れた時、どう思う？", a: ["面白くなってきた", "よし、やるぞ", "どうにかしなきゃ", "逃げたい", "誰かを頼る"], s: [10, 8, 5, 1, 4] },
+            { q: "過去の失敗をどう捉えている？", a: ["必要な経験", "学びの種", "たまに後悔する", "思い出したくない", "忘れてしまった"], s: [10, 8, 4, 1, 3] },
+            { q: "空や風からメッセージを感じる？", a: ["よくある", "たまにある", "あまりない", "気のせいだと思う", "空想が好き"], s: [10, 7, 3, 1, 6] },
+            { q: "見返りがなくても人を助けられる？", a: ["自然にできる", "できるだけする", "余裕があれば", "難しい", "自分を優先する"], s: [10, 8, 5, 2, 3] },
+            { q: "人生の終わりに何を重視する？", a: ["やりきった充実感", "残した功績", "平穏だったこと", "大切な人の笑顔", "まだ分からない"], s: [10, 8, 5, 9, 4] },
+            { q: "創作中、時間が止まる感覚がある？", a: ["常にある", "たまにある", "あまりない", "集中できない", "無心になれる"], s: [10, 8, 4, 1, 9] },
+            { q: "他人の悲しみを自分の事のように感じる？", a: ["強く感じる", "共感する", "客観的に見る", "関心がない", "受け流す"], s: [10, 8, 5, 1, 4] },
+            { q: "今の魂の状態を一言で言うなら？", a: ["1950度の情熱", "凪の状態", "燃焼中", "くすぶっている", "覚醒前夜"], s: [10, 9, 7, 3, 8] },
+            { q: "自分の中に「譲れない芯」がある？", a: ["確固たるものがある", "あると思う", "まだ探している", "流されやすい", "柔軟でいたい"], s: [10, 8, 5, 2, 6] },
+            { q: "日常の些細なことに感動できる？", a: ["常に感動がある", "よくある", "たまにある", "ほとんどない", "意識していない"], s: [10, 8, 5, 2, 3] },
+            { q: "今の生活にワクワクしている？", a: ["最高にワクワク", "それなりに楽しい", "普通", "あまり楽しくない", "変化を求めている"], s: [10, 8, 5, 2, 6] },
+            { q: "「運」は自分で手繰り寄せるもの？", a: ["100%そう思う", "ある程度思う", "運次第だと思う", "考えたことがない", "運も実力のうち"], s: [10, 8, 4, 2, 7] },
+            { q: "あなたは「魂」の存在を信じている？", a: ["確信している", "信じている", "分からない", "信じない", "考え中"], s: [10, 8, 4, 1, 5] }
+        ];
+
+        let currentIdx = 0, totalScore = 0;
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function showQ() {
+            if(currentIdx >= questions.length) {
+                document.getElementById('quiz').classList.add('hidden');
+                document.getElementById('result').classList.remove('hidden');
+                let type = "", desc = "";
+                if(totalScore >= 180) { type = "1950度の超新星"; desc = "あなたの情熱は周囲を照らし、未来を切り拓く圧倒的な力を持っています。"; }
+                else if(totalScore >= 140) { type = "静寂の蒼い炎"; desc = "冷静沈着に見えて、内側には誰よりも熱く、純粋なエネルギーを秘めています。"; }
+                else if(totalScore >= 100) { type = "変幻自在の凪"; desc = "どんな状況でも自分を保ち、周囲と調和しながら進める達人です。"; }
+                else { type = "覚醒前夜のマグマ"; desc = "まだ見ぬ可能性が眠っています。これから温度が上がっていくのが楽しみな状態です。"; }
+                document.getElementById('type-text').innerText = type;
+                document.getElementById('desc-text').innerText = desc;
+                return;
+            }
+            document.getElementById('progress').innerText = `QUESTION ${currentIdx + 1} / ${questions.length}`;
+            document.getElementById('question').innerText = questions[currentIdx].q;
+            const opt = document.getElementById('options');
+            opt.innerHTML = '';
+            
+            // 選択肢とスコアをセットにしてシャッフル
+            const list = [];
+            for (let i = 0; i < questions[currentIdx].a.length; i++) {
+                list.push({ text: questions[currentIdx].a[i], score: questions[currentIdx].s[i] });
+            }
+            const shuffledList = shuffle([...list]);
+
+            shuffledList.forEach(item => {
+                const btn = document.createElement('button');
+                btn.innerText = item.text;
+                btn.onclick = () => {
+                    totalScore += item.score;
+                    currentIdx++;
+                    showQ();
+                };
+                opt.appendChild(btn);
+            });
+        }
+        showQ();
+    </script>
+</body>
+</html>
