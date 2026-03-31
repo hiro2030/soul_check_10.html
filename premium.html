@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>魂度数測定 - 完全版</title>
     <style>
-        body { font-family: sans-serif; background-color: #ffffff; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #ffffff; color: #334155; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
         .card { background: #ffffff; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #f1f5f9; text-align: center; width: 95%; max-width: 480px; }
         h1 { font-size: 1.4rem; color: #1e293b; margin-bottom: 25px; }
         #progress { color: #94a3b8; font-size: 0.8rem; margin-bottom: 12px; font-weight: bold; }
@@ -68,12 +68,15 @@
                 document.getElementById('result').classList.remove('hidden');
                 document.getElementById('score').innerText = totalScore;
                 let type = "", desc = "";
-                if(totalScore >= 951) { type = "覚醒：1950度の超新星"; desc = "あなたは人類の限界を超え、光の存在へと近づいています。その愛で世界を照らしてください。"; }
-                else if(totalScore >= 950) { type = "究極：ペドゥリート級"; desc = "おめでとうございます！アミに選ばれたペドゥリート（950度）と同等の魂の持ち主です。その純粋さは宝物です。"; }
-                else if(totalScore >= 760) { type = "高徳：アミ（宇宙人）級"; desc = "アミ（760度）と同等以上の素晴らしい度数です。地球の常識を超えた、高い視点と愛を持っています。"; }
-                else if(totalScore >= 400) { type = "光明：目覚めし地球人"; desc = "魂が輝き始めています。エゴから解放され、宇宙の法則に従って生きる喜びを知り始めています。"; }
-                else if(totalScore >= 320) { type = "希望：愛の境界線"; desc = "自滅の危機を乗り越えるための最低限の愛を持っています。ここからペドゥリートを目指して磨きましょう！"; }
-                else { type = "未熟：愛の探求者"; desc = "まだ伸びしろしかありません。エゴの重みを少しずつ手放して、愛という軽やかな翼を手に入れましょう。"; }
+                
+                if(totalScore >= 951) { type = "覚醒：1950度の超新星"; desc = "アミすら超え、光の存在へと近づいています。その愛で世界を照らしてください。"; }
+                else if(totalScore >= 950) { type = "究極：アミ級"; desc = "おめでとうございます！宇宙の伝道師アミと同じ、完成された愛の持ち主です。"; }
+                else if(totalScore >= 800) { type = "高徳：ペドゥリート級"; desc = "ついにペドゥリートと同じ高みに到達しました！宇宙船に招待される準備は万端です。"; }
+                else if(totalScore >= 550) { type = "④ 覚醒の兆し"; desc = "エゴの殻が割れ、魂の輝きが外に漏れ出しています。愛の本質を理解し始めています。"; }
+                else if(totalScore >= 400) { type = "③ 目覚めの第一歩"; desc = "愛の重要性に気づき、日々の行動が変わり始めています。素晴らしい進化です！"; }
+                else if(totalScore >= 320) { type = "② 愛の境界線"; desc = "自滅の危機（320度）を突破！ここから魂を磨いて、ペドゥリートを目指しましょう。"; }
+                else { type = "① 未開の探求者"; desc = "まだ伸びしろしかありません。エゴを手放して、愛という軽やかな翼を手に入れましょう。"; }
+                
                 document.getElementById('type-text').innerText = type;
                 document.getElementById('desc-text').innerText = desc;
                 return;
